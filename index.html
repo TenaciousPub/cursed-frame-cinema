@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- BASE:START (managed by Coding Agent — do not edit) -->
+<base href="/cursed-frame-cinema/">
+<!-- BASE:END -->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+
+<!-- SEO Meta Tags -->
+<title>Cursed Frame Cinema</title>
+<meta property="og:title" content="Cursed Frame Cinema" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Cursed Frame Cinema" />
+<!-- End SEO Meta Tags -->
+
+<script data-field-replace>
+(function(){
+  var params=new URLSearchParams(window.location.search);
+  var fields={};
+  var paramMap={
+    'first_name':'firstName','last_name':'lastName','full_name':'fullName',
+    'email':'email','phone':'phone','company':'company',
+    'city':'city','state':'state','country':'country'
+  };
+  var skipTags={'SCRIPT':1,'STYLE':1,'NOSCRIPT':1,'TEXTAREA':1,'CODE':1,'PRE':1};
+  var hasUrlFields=false;
+  for(var p in paramMap){
+    var v=params.get(p);
+    if(v){fields[paramMap[p]]=v;hasUrlFields=true;}
+  }
+  var contactId=params.get('contact_id');
+  function esc(s){
+    if(!s)return s;
+    var d=document.createElement('div');
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+  function doReplace(data){
+    var r={};
+    r['{{full_name}}']=esc(((data.firstName||'')+' '+(data.lastName||'')).trim()||((data.fullName||data.name)||''));
+    r['{{first_name}}']=esc(data.firstName||(data.name?data.name.split(' ')[0]:'')||'');
+    r['{{last_name}}']=esc(data.lastName||(data.name&&data.name.indexOf(' ')>-1?data.name.substring(data.name.indexOf(' ')+1):'')||'');
+    r['{{email}}']=esc(data.email||'');
+    r['{{phone}}']=esc(data.phone||'');
+    r['{{company}}']=esc(data.company||'');
+    r['{{city}}']=esc(data.city||'');
+    r['{{state}}']=esc(data.state||'');
+    r['{{country}}']=esc(data.country||'');
+    r['{{date}}']=new Date().toLocaleDateString();
+    r['{{time}}']=new Date().toLocaleTimeString();
+    r['{{location}}']=[data.city,data.state,data.country].filter(Boolean).join(', ');
+    r['{{tracking_id}}']=esc(data.trackingId||'');
+    r['{{lastClickedProduct}}']=esc(data.lastClickedProduct||'');
+    r['{{lastProductClickDate}}']=esc(data.lastProductClickDate||'');
+    r['{{lastClickedProductPrice}}']=esc(data.lastClickedProductPrice||'');
+    r['{{lastClickedProductURL}}']=esc(data.lastClickedProductURL||'');
+    r['{{productsClickedCount}}']=esc(data.productsClickedCount||'0');
+    r['{{ip_address}}']=esc(data.ipAddress||'');
+    r['{{ip}}']=esc(data.ipAddress||'');
+    if(data.customFields){
+      for(var k in data.customFields){
+        r['{{'+k+'}}']=esc(String(data.customFields[k]||''));
+      }
+    }
+    params.forEach(function(v,k){
+      if(!paramMap[k]&&k!=='contact_id'&&k!=='page_id'&&k.indexOf('utm_')!==0){
+        r['{{'+k+'}}']=esc(v);
+      }
+    });
+    var hasValues=false;
+    for(var key in r){if(r[key]){hasValues=true;break;}}
+    if(!hasValues)return;
+    var walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{
+      acceptNode:function(n){
+        var p=n.parentNode;
+        if(p&&skipTags[p.nodeName])return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var node;
+    while(node=walker.nextNode()){
+      var txt=node.nodeValue;
+      if(txt&&txt.indexOf('{{')>-1){
+        var changed=txt;
+        for(var ph in r){
+          if(r[ph]&&changed.indexOf(ph)>-1){
+            changed=changed.split(ph).join(r[ph]);
+          }
+        }
+        if(changed!==txt)node.nodeValue=changed;
+      }
+    }
+    var attrs=['value','placeholder','content','alt','title'];
+    attrs.forEach(function(attr){
+      var els=document.querySelectorAll('['+attr+'*="{{"]');
+      for(var i=0;i<els.length;i++){
+        var tag=els[i].tagName;
+        if(skipTags[tag])continue;
+        var val=els[i].getAttribute(attr);
+        if(val){
+          var nv=val;
+          for(var ph in r){
+            if(r[ph]&&nv.indexOf(ph)>-1){
+              nv=nv.split(ph).join(r[ph]);
+            }
+          }
+          if(nv!==val)els[i].setAttribute(attr,nv);
+        }
+      }
+    });
+  }
+  function run(){
+    if(contactId){
+      var xhr=new XMLHttpRequest();
+      xhr.open('GET','https://paymegpt.com/api/landing/context/'+encodeURIComponent(contactId)+'?page_id=4058');
+      xhr.onload=function(){
+        if(xhr.status===200){
+          try{
+            var resp=JSON.parse(xhr.responseText);
+            if(resp.success&&resp.contact){
+              var merged=resp.contact;
+              for(var k in fields){merged[k]=fields[k];}
+              doReplace(merged);
+              return;
+            }
+          }catch(e){}
+        }
+        if(hasUrlFields)doReplace(fields);
+      };
+      xhr.onerror=function(){if(hasUrlFields)doReplace(fields);};
+      xhr.send();
+    }else if(hasUrlFields){
+      doReplace(fields);
+    }
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',run);}
+  else{run();}
+})();
+</script>
+<script data-payment>
+(function(){
+  var slug='sz98aznNbk';
+  var apiBase='https://paymegpt.com';
+  function findEmail(){
+    var ids=['email','emailAddress','buyer-email','buyerEmail','user-email','userEmail','checkout-email','customer-email','contact-email'];
+    for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el&&el.value&&el.value.includes('@'))return el.value.trim();}
+    var inputs=document.querySelectorAll('input[type="email"],input[name*="email"],input[placeholder*="email"],input[placeholder*="Email"]');
+    for(var j=0;j<inputs.length;j++){if(inputs[j].value&&inputs[j].value.includes('@'))return inputs[j].value.trim();}
+    return '';
+  }
+  function findName(){
+    var ids=['name','fullName','full-name','buyer-name','buyerName','customer-name','userName','user-name'];
+    for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el&&el.value)return el.value.trim();}
+    var inputs=document.querySelectorAll('input[name*="name"]:not([name*="email"]):not([type="email"]),input[placeholder*="name"]:not([placeholder*="email"]):not([type="email"]),input[placeholder*="Name"]:not([type="email"])');
+    for(var j=0;j<inputs.length;j++){if(inputs[j].value)return inputs[j].value.trim();}
+    return '';
+  }
+  var __realProcessPayment=function(a,b,c,d,e){
+    var amountCents,email,productName,productDescription,customerName,quantity;
+    if(a&&typeof a==='object'){
+      amountCents=a.amountCents;email=a.email;productName=a.productName;
+      productDescription=a.productDescription||'';customerName=a.name||'';quantity=a.quantity||1;
+    }else{
+      amountCents=typeof a==='number'?a:0;productName=typeof b==='string'?b:'';
+      productDescription=typeof c==='string'?c:'';email='';customerName='';quantity=1;
+    }
+    if(!email)email=findEmail();
+    if(!customerName)customerName=findName();
+    if(!productName){alert('Product name is required.');return Promise.reject('no_product_name');}
+    if(!amountCents||amountCents<100){alert('Amount must be at least $1.00');return Promise.reject('invalid_amount');}
+    if(!email){alert('Please enter your email address.');return Promise.reject('no_email');}
+    var successBase=window.location.href.split('?')[0];
+    return fetch(apiBase+'/api/landing-pages/public/'+slug+'/payment/checkout',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email,name:customerName,amountCents:amountCents,productName:productName,productDescription:productDescription,quantity:quantity,successUrl:successBase+'?payment=success&product='+encodeURIComponent(productName)+'&session_id={CHECKOUT_SESSION_ID}',cancelUrl:successBase+'?payment=cancelled'})
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d.checkoutUrl){window.location.href=d.checkoutUrl;}
+      else{alert(d.error||'Failed to process payment');throw new Error(d.error);}
+    });
+  };
+  Object.defineProperty(window,'__processPayment',{value:__realProcessPayment,writable:false,configurable:false});
+  document.addEventListener('DOMContentLoaded',function(){
+    var urlParams=new URLSearchParams(window.location.search);
+    if(urlParams.get('payment')==='success'){
+      var pName=urlParams.get('product')||'your item';
+      var overlay=document.createElement('div');overlay.id='payment-success-overlay';
+      overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:999999;font-family:system-ui,-apple-system,sans-serif;';
+      overlay.innerHTML='<div style="background:white;border-radius:16px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.15);"><div style="width:64px;height:64px;border-radius:50%;background:#dcfce7;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><h2 style="margin:0 0 12px;font-size:24px;font-weight:700;color:#111827;">Payment Successful!</h2><p style="margin:0 0 24px;color:#6b7280;font-size:16px;">Thank you for purchasing '+pName.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'.</p><button onclick="document.getElementById(\'payment-success-overlay\').remove();window.history.replaceState({},\'\',window.location.pathname);" style="padding:12px 32px;font-size:16px;font-weight:600;background:#16a34a;color:white;border:none;border-radius:8px;cursor:pointer;">Continue</button></div>';
+      document.body.appendChild(overlay);
+    }
+  });
+})();
+</script>  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <img src="https://paymegpt.com/objects/generated-images/51/1778885432592-feb5b0b69389812a.png" alt="Cursed Frame Cinema Logo" class="logo">
+  <div class="header-text">
+    <h1>Cursed Frame Cinema</h1>
+    <p>Monthly Horror Movie Club</p>
+  </div>
+</header>
+
+<div class="hero">
+  <h2>What Shall We <span>Screen Next?</span></h2>
+  <p>Suggest a film, cast your votes, and let the darkness decide.</p>
+  <div class="next-date">
+    <div class="label">Current Screening Period</div>
+    <div class="date" id="next-event-display">—</div>
+  </div>
+</div>
+
+<div class="winner-wrap">
+  <div class="winner-banner" id="winner-banner">
+    <div class="winner-placeholder">Loading the chosen film…</div>
+  </div>
+  <div class="past-link-wrap">
+    <a href="https://paymegpt.com/p/d7yQhAE" class="past-link">View all past screenings →</a>
+  </div>
+</div>
+
+<div class="content-wrap">
+  <div class="section-block">
+    <div class="section-title">Proposed Films</div>
+    <div class="section-sub">One vote per soul, per film. You may change your fate at any time.</div>
+    <div class="voting-as" id="voting-as" style="display:none">
+      Voting as <span class="name" id="voter-name-display"></span>
+      <button onclick="changeVoter()">Not you?</button>
+    </div>
+    <div id="proposals-list">
+      <div class="spinner-wrap"><div class="spinner"></div><br>Summoning films from the void…</div>
+    </div>
+  </div>
+  <hr class="divider">
+  <div class="section-block">
+    <div class="section-title">Propose a Film</div>
+    <div class="form-card">
+      <div class="form-row-2">
+        <div>
+          <label for="ProposedBy">Your Name <span class="req">*</span></label>
+          <input type="text" id="ProposedBy" placeholder="Your name" maxlength="80">
+        </div>
+        <div>
+          <label for="Category">Genre <span class="req">*</span></label>
+          <select id="Category">
+            <option value="">— Choose —</option>
+            <option value="🩸 Slasher">🩸 Slasher</option>
+            <option value="👻 Supernatural">👻 Supernatural</option>
+            <option value="🧟 Creature Feature">🧟 Creature Feature</option>
+            <option value="🔪 Psychological">🔪 Psychological</option>
+            <option value="😱 Cult Classic">😱 Cult Classic</option>
+            <option value="🌑 Foreign Horror">🌑 Foreign Horror</option>
+            <option value="🎃 Horror Comedy">🎃 Horror Comedy</option>
+            <option value="☠️ Other">☠️ Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="ProposalTitle">Film Title <span class="req">*</span></label>
+        <input type="text" id="ProposalTitle" placeholder="e.g. The Thing (1982)" maxlength="100">
+      </div>
+      <div class="form-row-2">
+        <div>
+          <label for="Address">Streaming Platform <span class="opt">(optional)</span></label>
+          <input type="text" id="Address" placeholder="e.g. Shudder, Max, Tubi…" maxlength="200">
+        </div>
+        <div>
+          <label for="TrailerURL">Trailer URL <span class="opt">(optional)</span></label>
+          <input type="url" id="TrailerURL" placeholder="https://youtube.com/watch?v=…" maxlength="500">
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="Description">Why We Must Watch It</label>
+        <textarea id="Description" placeholder="Sell it to the group… or warn them…" maxlength="400"></textarea>
+      </div>
+      <button class="submit-btn" onclick="submitProposal()">☠ Submit This Film ☠</button>
+    </div>
+  </div>
+</div>
+
+<footer><strong>Cursed Frame Cinema</strong> · Where every pick leaves a mark</footer>
+<div id="toast"></div>
+
+<div class="modal-overlay" id="name-modal">
+  <div class="modal">
+    <h3>Who Dares Vote?</h3>
+    <p>Enter your name so your vote follows you across devices. One soul, one vote per film.</p>
+    <input type="text" id="modal-name-input" placeholder="Your name" maxlength="60" onkeydown="if(event.key==='Enter')confirmVoterName()">
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeNameModal()">Retreat</button>
+      <button class="modal-confirm" onclick="confirmVoterName()">Proceed</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUBMIT_WEBHOOK='https://paymegpt.com/api/webhooks/flow/3077/9c5f37d7c49c88223114e228137a7b9c1d4136b869cea8527d0d867ec24e0127';
+  const VOTE_WEBHOOK='https://paymegpt.com/api/webhooks/flow/3078/6e2eb2f91ce6390ea1684766a045f1200ac63163381576abbf151db7952dad39';
+  const VOTES_DATA_URL='https://paymegpt.com/api/public/landing-pages/4056/sheet-data';
+  const WINNER_DATA_URL='https://paymegpt.com/api/public/landing-pages/4057/sheet-data';
+
+  (function(){var now=new Date();document.getElementById('next-event-display').textContent=now.toLocaleDateString('en-US',{month:'long',year:'numeric'})+' Screening';})();
+
+  var toastTimer;
+  function showToast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className=(type||'success')+' show';clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},3600);}
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function getVoterName(){try{return localStorage.getItem('cfc_voter_name')||'';}catch(e){return '';}}
+  function setVoterName(n){try{localStorage.setItem('cfc_voter_name',n);}catch(e){}}
+  function voterIdFromName(n){return String(n||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+  function refreshVotingAs(){var name=getVoterName();var bar=document.getElementById('voting-as');if(name){document.getElementById('voter-name-display').textContent=name;bar.style.display='flex';}else{bar.style.display='none';}}
+  function changeVoter(){openNameModal(null);}
+  var pendingVote=null;
+  function openNameModal(queued){pendingVote=queued;var input=document.getElementById('modal-name-input');input.value=getVoterName();document.getElementById('name-modal').classList.add('show');setTimeout(function(){input.focus();},50);}
+  function closeNameModal(){document.getElementById('name-modal').classList.remove('show');pendingVote=null;}
+  function confirmVoterName(){var name=(document.getElementById('modal-name-input').value||'').trim();if(!name){showToast('Enter a name','error');return;}setVoterName(name);refreshVotingAs();document.getElementById('name-modal').classList.remove('show');var queued=pendingVote;pendingVote=null;if(queued)castVote(queued.rowId,queued.direction);}
+  var proposalsCache=[];var voteRows=[];
+  async function loadAll(){await Promise.all([loadVotes(),loadProposalsRaw()]);renderProposals();loadWinner();}
+  async function loadVotes(){try{var res=await fetch(VOTES_DATA_URL+'?t='+Date.now());if(!res.ok)throw new Error();var json=await res.json();voteRows=Array.isArray(json)?json:(json.data||json.rows||[]);}catch(e){voteRows=[];}}
+  async function loadProposalsRaw(){var metaEl=document.querySelector('meta[name="sheet-data-url"]');if(!metaEl){proposalsCache=[];return;}try{var res=await fetch(metaEl.content+'?t='+Date.now());if(!res.ok)throw new Error();var json=await res.json();var rows=Array.isArray(json)?json:(json.data||json.rows||[]);var merged=new Map();rows.forEach(function(r){var key=String(r.RowID||'');if(!key||key==='TEST-001'||key.indexOf('TRIGGER-')===0)return;var m=merged.get(key);if(!m){m={RowID:key,ProposalTitle:'',Category:'',ProposedBy:'',Description:'',Address:'',SubmittedDate:'',TrailerURL:''};merged.set(key,m);}if(!m.ProposalTitle&&r.ProposalTitle)m.ProposalTitle=String(r.ProposalTitle);if(!m.Category&&r.Category)m.Category=String(r.Category);if(!m.ProposedBy&&r.ProposedBy)m.ProposedBy=String(r.ProposedBy);if(!m.Description&&r.Description)m.Description=String(r.Description);if(!m.Address&&r.Address)m.Address=String(r.Address);if(!m.SubmittedDate&&r.SubmittedDate)m.SubmittedDate=String(r.SubmittedDate);if(!m.TrailerURL&&r.TrailerURL)m.TrailerURL=String(r.TrailerURL);});proposalsCache=Array.from(merged.values()).filter(function(m){return m.ProposalTitle&&m.ProposalTitle.trim();});}catch(e){proposalsCache=[];}}
+  function tallyFor(rowId){var byVoter=new Map();voteRows.forEach(function(v){if(String(v.RowID||'')!==String(rowId))return;var vid=String(v.VoterID||'').trim();if(!vid)return;var dir=String(v.Direction||'').trim().toLowerCase();if(dir!=='up'&&dir!=='down')return;var ts=String(v.Timestamp||'');var existing=byVoter.get(vid);if(!existing||ts>=existing.ts)byVoter.set(vid,{direction:dir,ts:ts});});var up=0,down=0;byVoter.forEach(function(rec){if(rec.direction==='up')up++;else down++;});return{up:up,down:down,net:up-down,byVoter:byVoter};}
+  function myVoteFor(rowId){var vid=voterIdFromName(getVoterName());if(!vid)return null;return(tallyFor(rowId).byVoter.get(vid)||{}).direction||null;}
+
+  function renderProposals(){
+    var list=document.getElementById('proposals-list');
+    if(!proposalsCache.length){list.innerHTML='<div class="empty-state"><div class="big-icon">🎬</div>No films proposed yet — be the first to curse the group.</div>';return;}
+    var withTally=proposalsCache.map(function(p){var t=tallyFor(p.RowID);return{p:p,up:t.up,down:t.down,net:t.net};});
+    withTally.sort(function(a,b){return b.net-a.net;});
+    list.innerHTML='';
+    withTally.forEach(function(item,i){
+      var p=item.p;
+      var rowId=String(p.RowID);
+      var safeId=rowId.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      var mine=myVoteFor(rowId);
+      var date=p.SubmittedDate?new Date(p.SubmittedDate).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+      var metaRow='';
+      if(p.Address&&p.Address.trim()){metaRow+='<span class="card-platform">📺 '+esc(p.Address)+'</span>';}
+      if(p.TrailerURL&&p.TrailerURL.trim()){metaRow+='<a class="trailer-btn" href="'+esc(p.TrailerURL)+'" target="_blank" rel="noopener">▶ Watch Trailer</a>';}
+      var card=document.createElement('div');
+      card.className='proposal-card';
+      card.style.animationDelay=(i*0.05)+'s';
+      card.innerHTML=
+        '<div class="card-top"><h4>'+esc(p.ProposalTitle)+'</h4>'+(p.Category?'<span class="cat-tag">'+esc(p.Category)+'</span>':'')+'</div>'+
+        (p.Description?'<p class="card-desc">'+esc(p.Description)+'</p>':'')+
+        (metaRow?'<div class="card-meta-row">'+metaRow+'</div>':'')+
+        '<div class="card-bottom">'+
+          '<div class="card-meta"><span class="by">— '+esc(p.ProposedBy||'Anonymous')+'</span>'+(date?'· '+date:'')+'</div>'+
+          '<div class="vote-btns">'+
+            '<button class="vote-btn up'+(mine==='up'?' active':'')+'" onclick="castVote(\''+safeId+'\',\'up\')">☠ <span>'+item.up+'</span></button>'+
+            '<span class="net-score'+(item.net>0?' positive':item.net<0?' negative':'')+'">'+item.net+'</span>'+
+            '<button class="vote-btn down'+(mine==='down'?' active':'')+'" onclick="castVote(\''+safeId+'\',\'down\')">💀 <span>'+item.down+'</span></button>'+
+          '</div>'+
+        '</div>';
+      list.appendChild(card);
+    });
+  }
+
+  async function castVote(rowId,direction){var name=getVoterName();if(!name){openNameModal({rowId:rowId,direction:direction});return;}var vid=voterIdFromName(name);var current=myVoteFor(rowId);if(current===direction){showToast('Already voted '+direction+' on this','success');return;}voteRows.push({RowID:rowId,Direction:direction,VoterID:vid,VoterName:name,Timestamp:new Date().toISOString()});renderProposals();var payload={contactName:name,contactPhone:'0000000000',contactEmail:vid+'@voter.local',RowID:rowId,Direction:direction,VoterID:vid,VoterName:name,Timestamp:new Date().toISOString()};try{var res=await fetch(VOTE_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});showToast(res.ok?(direction==='up'?'☠ Vote cast!':'💀 Vote cast!'):'Vote saved — refresh to confirm','success');}catch(e){showToast('Vote saved locally — refresh to confirm','success');}}
+
+  async function submitProposal(){
+    var name=(document.getElementById('ProposedBy').value||'').trim();
+    var title=(document.getElementById('ProposalTitle').value||'').trim();
+    var desc=(document.getElementById('Description').value||'').trim();
+    var category=(document.getElementById('Category').value||'').trim();
+    var address=(document.getElementById('Address').value||'').trim();
+    var trailerUrl=(document.getElementById('TrailerURL').value||'').trim();
+    if(!name){showToast('Enter your name','error');return;}
+    if(!title){showToast('Give the film a title','error');return;}
+    if(!category){showToast('Pick a genre','error');return;}
+    var btn=document.querySelector('.submit-btn');
+    btn.disabled=true;btn.textContent='SUBMITTING TO THE VOID…';
+    var today=new Date().toISOString().split('T')[0];
+    var payload={contactName:name,contactPhone:'0000000000',contactEmail:name.toLowerCase().replace(/[^a-z0-9]/g,'')+'@proposer.local',ProposalTitle:title,Description:desc,Category:category,Address:address,TrailerURL:trailerUrl,SubmittedDate:today,RowID:Date.now().toString()};
+    try{
+      var res=await fetch(SUBMIT_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(res.ok){
+        showToast('🎬 Film submitted! The curse is cast, '+name+'!','success');
+        ['ProposedBy','ProposalTitle','Description','Address','TrailerURL'].forEach(function(id){document.getElementById(id).value='';});
+        document.getElementById('Category').value='';
+        setTimeout(function(){loadProposalsRaw().then(renderProposals);},2800);
+      }else{showToast('Error '+res.status,'error');}
+    }catch(e){showToast('Network error','error');}
+    btn.disabled=false;btn.textContent='☠ Submit This Film ☠';
+  }
+
+  async function loadWinner(){
+    var banner=document.getElementById('winner-banner');
+    try{
+      var res=await fetch(WINNER_DATA_URL+'?t='+Date.now());
+      if(!res.ok)throw new Error();
+      var json=await res.json();
+      var rows=Array.isArray(json)?json:(json.data||json.rows||[]);
+      var valid=rows.filter(function(r){return r.WinnerTitle&&String(r.WinnerTitle).trim();});
+      if(!valid.length){banner.innerHTML='<div class="winner-placeholder">🩸 The vote is open — the chosen film will be revealed soon…</div>';return;}
+      var w=valid[valid.length-1];
+      var net=parseInt(w.NetVotes)||0;
+      var picked='';
+      if(w.PickedAt){var d=new Date(w.PickedAt);if(!isNaN(d.getTime()))picked=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});}
+      var addrHtml='';
+      if(w.WinnerAddress&&String(w.WinnerAddress).trim()){addrHtml='<div class="winner-address"><span style="font-family:Cinzel,serif;font-size:.84rem;color:var(--bone)">📺 '+esc(w.WinnerAddress)+'</span></div>';}
+      var trailerHtml='';
+      if(w.TrailerURL&&String(w.TrailerURL).trim()){trailerHtml='<a class="winner-trailer" href="'+esc(w.TrailerURL)+'" target="_blank" rel="noopener">▶ Watch Trailer</a>';}
+      banner.innerHTML=
+        '<div class="winner-top"><span class="winner-crown">🩸</span><span class="winner-label">This Month\'s Screening — It Is Decided</span>'+(picked?'<span class="winner-subtitle">'+esc(picked)+'</span>':'')+'</div>'+
+        '<div class="winner-title">'+esc(w.WinnerTitle)+'</div>'+
+        (w.WinnerDescription?'<div class="winner-desc">'+esc(w.WinnerDescription)+'</div>':'')+
+        addrHtml+
+        '<div class="winner-meta">'+
+          (w.WinnerCategory?'<span class="winner-cat">'+esc(w.WinnerCategory)+'</span>':'')+
+          (w.WinnerProposedBy?'<span class="winner-by">summoned by '+esc(w.WinnerProposedBy)+'</span>':'')+
+          '<span class="winner-votes">⚡ '+net+' net votes</span>'+
+        '</div>'+
+        trailerHtml;
+    }catch(e){banner.innerHTML='<div class="winner-placeholder">🩸 The vote is open — the chosen film will be revealed soon…</div>';}
+  }
+
+  refreshVotingAs();
+  loadAll();
+</script>
+</body>
+</html>
